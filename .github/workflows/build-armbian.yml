@@ -29,7 +29,7 @@ on:
       - 'config/**'
 
 env:
-  ARMBIAN_VERSION: v2021.05
+  ARMBIAN_VERSION: main
   BOARD_NAME: q9s-rk3128
 
 permissions:
@@ -76,10 +76,10 @@ jobs:
       
       - name: Clone Armbian build system
         run: |
-          git clone --depth=1 --branch=${{ env.ARMBIAN_VERSION }} \
+          git clone --depth=1 \
             https://github.com/armbian/build.git armbian-build
           
-          echo "Armbian version: ${{ env.ARMBIAN_VERSION }}"
+          echo "Using Armbian main branch"
           cd armbian-build && git log -1 --oneline
       
       - name: Setup custom board configuration
@@ -163,16 +163,16 @@ jobs:
           CONFIG_MALI400=y
           KERNEL_EOF
       
-      - name: Build Armbian image using Docker
+      - name: Build Armbian image
         run: |
           cd armbian-build
           
-          # Run build with Docker (this uses Ubuntu 20.04/18.04 container inside)
-          ./compile.sh docker \
+          # Run build directly (new Armbian supports Ubuntu 22.04)
+          ./compile.sh \
             BOARD=${{ env.BOARD_NAME }} \
-            BRANCH=legacy \
+            BRANCH=current \
             RELEASE=${{ github.event.inputs.release || 'bullseye' }} \
-            BUILD_MINIMAL=no \
+            BUILD_MINIMAL=yes \
             BUILD_DESKTOP=no \
             KERNEL_ONLY=no \
             KERNEL_CONFIGURE=${{ github.event.inputs.kernel_configure || 'no' }} \
